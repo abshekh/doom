@@ -35,6 +35,23 @@
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-one)
 
+;; splash screen
+
+(let ((alternatives '(
+  "doomEmacs.svg"
+  "doomEmacsDoomOne.svg"
+  "doomEmacsDracula.svg"
+  "doomEmacsGruvbox.svg"
+  "doomEmacsRouge.svg"
+  "doomEmacsSolarized.svg"
+  "doomEmacsTokyoNight.svg"
+  "doomEmacsTokyoNight2.svg"
+  "doomEmacsTokyoNight3.svg"
+)))
+  (setq fancy-splash-image
+        (concat doom-private-dir "/etc/splash/resize/"
+                (nth (random (length alternatives)) alternatives))))
+
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
