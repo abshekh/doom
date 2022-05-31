@@ -84,3 +84,46 @@
 (global-set-key (kbd "<C-up>") 'enlarge-window)
 (global-set-key (kbd "<C-right>") 'shrink-window-horizontally)
 (global-set-key (kbd "<C-left>") 'enlarge-window-horizontally)
+
+;; lsp config
+;; (setq lsp-java-vmargs
+;;       '("-javaagent:~/.jars/lombok/lombok-1.18.25.jar"
+;;         "-Xbootclasspath/a:~/.jars/lombok/lombok-1.18.25.jar"))
+;;
+;; (after! lsp-java
+;;   (setq lsp-java-java-path "~/.sdkman/candidates/java/11.0.15-tem/bin/java")
+;;   (setq lsp-java-save-actions-organize-imports t))
+;;
+
+;; lang/java
+
+;; Enforce Google Java Code Style
+;; See https://google.github.io/styleguide/javaguide.html
+(when (featurep! :lang java)
+  (when (featurep! :lang java +lsp)
+    (setq lsp-java-format-settings-url "http://google.github.io/styleguide/eclipse-java-google-style.xml"))
+  (set-formatter! 'google-java-format
+    '("google-java-format" "-")
+    :modes 'java-mode)
+  (setq-hook! 'java-mode-hook
+    tab-width 2
+    fill-column 100))
+
+(when (featurep! :lang java +lsp)
+  (setq lsp-java-maven-download-sources t
+        lsp-java-autobuild-enabled nil
+        lsp-java-selection-enabled nil
+        lsp-java-code-generation-use-blocks t
+        lsp-java-code-generation-generate-comments t
+        lsp-java-code-generation-to-string-code-style "STRING_BUILDER")
+
+  ;; Lombok support
+  ;; See https://github.com/redhat-developer/vscode-java/wiki/Lombok-support
+  (after! lsp-java
+    (push (concat "-javaagent:"
+                  (expand-file-name (concat doom-private-dir
+                                            "etc/lombok/lombok-1.18.25.jar")))
+          lsp-java-vmargs))
+
+  ;; Groovy
+  (add-hook 'groovy-mode-local-vars-hook #'lsp!))
