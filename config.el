@@ -22,32 +22,27 @@
 ;; accept. For example:
 ;;
 (setq doom-font (font-spec :family "Hack Nerd Font" :size 20 :weight 'semi-light)
-     doom-variable-pitch-font (font-spec :family "Fira Sans" :size 21)
-     doom-big-font (font-spec :family "Hack Nerd Font" :size 32 :weight 'regular))
+      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 21)
+      doom-big-font (font-spec :family "Hack Nerd Font" :size 32 :weight 'regular))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
 ;; refresh your font settings. If Emacs still can't find your font, it likely
 ;; wasn't installed correctly. Font issues are rarely Doom issues!
 
-;; There are two ways to load a theme. Both assume the theme is installed and
-;; available. You can either set `doom-theme' or manually load a theme with the
-;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'doom-horizon)
 
 ;; splash screen
 
-(let ((alternatives '(
-  "doomEmacs.svg"
-  "doomEmacsDoomOne.svg"
-  "doomEmacsDracula.svg"
-  "doomEmacsGruvbox.svg"
-  "doomEmacsRouge.svg"
-  "doomEmacsSolarized.svg"
-  "doomEmacsTokyoNight.svg"
-  "doomEmacsTokyoNight2.svg"
-  "doomEmacsTokyoNight3.svg"
-)))
+(let ((alternatives '("doomEmacs.svg"
+                      "doomEmacsDoomOne.svg"
+                      "doomEmacsDracula.svg"
+                      "doomEmacsGruvbox.svg"
+                      "doomEmacsRouge.svg"
+                      "doomEmacsSolarized.svg"
+                      "doomEmacsTokyoNight.svg"
+                      "doomEmacsTokyoNight2.svg"
+                      "doomEmacsTokyoNight3.svg")))
   (setq fancy-splash-image
         (concat doom-private-dir "/etc/splash/resize/"
                 (nth (random (length alternatives)) alternatives))))
@@ -102,16 +97,6 @@
 (global-set-key (kbd "<C-right>") 'shrink-window-horizontally)
 (global-set-key (kbd "<C-left>") 'enlarge-window-horizontally)
 
-;; lsp config
-;; (setq lsp-java-vmargs
-;;       '("-javaagent:~/.jars/lombok/lombok-1.18.25.jar"
-;;         "-Xbootclasspath/a:~/.jars/lombok/lombok-1.18.25.jar"))
-;;
-;; (after! lsp-java
-;;   (setq lsp-java-java-path "~/.sdkman/candidates/java/11.0.15-tem/bin/java")
-;;   (setq lsp-java-save-actions-organize-imports t))
-;;
-
 ;; lang/java
 
 ;; Enforce Google Java Code Style
@@ -119,7 +104,7 @@
 (when (featurep! :lang java)
   (when (featurep! :lang java +lsp)
     (setq
-        lsp-java-format-settings-url "http://google.github.io/styleguide/eclipse-java-google-style.xml"))
+     lsp-java-format-settings-url "http://google.github.io/styleguide/eclipse-java-google-style.xml"))
   (set-formatter! 'google-java-format
     '("google-java-format" "-")
     :modes 'java-mode)
