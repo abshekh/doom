@@ -118,7 +118,8 @@
 ;; See https://google.github.io/styleguide/javaguide.html
 (when (featurep! :lang java)
   (when (featurep! :lang java +lsp)
-    (setq lsp-java-format-settings-url "http://google.github.io/styleguide/eclipse-java-google-style.xml"))
+    (setq
+        lsp-java-format-settings-url "http://google.github.io/styleguide/eclipse-java-google-style.xml"))
   (set-formatter! 'google-java-format
     '("google-java-format" "-")
     :modes 'java-mode)
@@ -137,10 +138,10 @@
   ;; Lombok support
   ;; See https://github.com/redhat-developer/vscode-java/wiki/Lombok-support
   (after! lsp-java
-    (push (concat "-javaagent:"
-                  (expand-file-name (concat doom-private-dir
-                                            "etc/lombok/lombok-1.18.25.jar")))
+    (push (concat "-javaagent:" (expand-file-name (concat doom-private-dir "etc/lombok/lombok-1.18.25.jar")))
           lsp-java-vmargs))
 
   ;; Groovy
   (add-hook 'groovy-mode-local-vars-hook #'lsp!))
+
+(setq auto-save-default t)
