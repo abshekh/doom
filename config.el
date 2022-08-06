@@ -6,7 +6,7 @@
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
-(setq user-full-name "John Doe"
+(setq user-full-name "Abhishek Singh"
       user-mail-address "john@doe.com")
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom:
@@ -21,9 +21,9 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-(setq doom-font (font-spec :family "Hack Nerd Font" :size 20 :weight 'semi-light)
-      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 21)
-      doom-big-font (font-spec :family "Hack Nerd Font" :size 32 :weight 'regular))
+(setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 17 :weight 'regular)
+      doom-variable-pitch-font (font-spec :family "JetBrainsMono Nerd Font" :size 18)
+      doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 32 :weight 'regular))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -56,7 +56,7 @@
 (setq org-directory "~/org/")
 
 ;; Projectile
-(setq projectile-project-search-path '("~/Dev/"))
+(setq projectile-project-search-path '("~/dev/" "~/work/"))
 
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
@@ -101,32 +101,69 @@
 
 ;; Enforce Google Java Code Style
 ;; See https://google.github.io/styleguide/javaguide.html
-(when (featurep! :lang java)
-  (when (featurep! :lang java +lsp)
-    (setq
-     lsp-java-format-settings-url "http://google.github.io/styleguide/eclipse-java-google-style.xml"))
-  (set-formatter! 'google-java-format
-    '("google-java-format" "-")
-    :modes 'java-mode)
-  (setq-hook! 'java-mode-hook
-    tab-width 2
-    fill-column 100))
+;; (when (featurep! :lang java)
+;;   (when (featurep! :lang java +lsp)
+;;     (setq
+;;      lsp-java-format-settings-url "http://google.github.io/styleguide/eclipse-java-google-style.xml"))
+;;   (set-formatter! 'google-java-format
+;;     '("google-java-format" "-")
+;;     :modes 'java-mode)
+;;   (setq-hook! 'java-mode-hook
+;;     tab-width 2
+;;     fill-column 100))
 
-(when (featurep! :lang java +lsp)
-  (setq lsp-java-maven-download-sources t
-        lsp-java-autobuild-enabled nil
-        lsp-java-selection-enabled nil
-        lsp-java-code-generation-use-blocks t
-        lsp-java-code-generation-generate-comments t
-        lsp-java-code-generation-to-string-code-style "STRING_BUILDER")
+;; (when (featurep! :lang java +lsp)
+;;   (setq lsp-java-maven-download-sources t
+;;         lsp-java-autobuild-enabled nil
+;;         lsp-java-selection-enabled nil
+;;         lsp-java-code-generation-use-blocks t
+;;         lsp-java-code-generation-generate-comments t
+;;         lsp-java-code-generation-to-string-code-style "STRING_BUILDER")
 
-  ;; Lombok support
-  ;; See https://github.com/redhat-developer/vscode-java/wiki/Lombok-support
-  (after! lsp-java
-    (push (concat "-javaagent:" (expand-file-name (concat doom-private-dir "etc/lombok/lombok-1.18.25.jar")))
-          lsp-java-vmargs))
+;;   ;; Lombok support
+;;   ;; See https://github.com/redhat-developer/vscode-java/wiki/Lombok-support
+;;   (after! lsp-java
+;;     (push (concat "-javaagent:" (expand-file-name (concat doom-private-dir "etc/lombok/lombok-1.18.25.jar")))
+;;           lsp-java-vmargs))
 
-  ;; Groovy
-  (add-hook 'groovy-mode-local-vars-hook #'lsp!))
+;;   ;; Groovy
+;;   (add-hook 'groovy-mode-local-vars-hook #'lsp!))
 
 (setq auto-save-default t)
+(setq +evil-want-o/O-to-continue-comments nil)
+(setq +default-want-RET-continue-comments t)
+
+(setq lsp-lens-enable nil)
+
+;; (add-hook 'haskell-mode-hook #'hindent-mode)
+
+(map! :n "gf" 'evil-find-file-at-point-with-line)
+(map! :n "L" 'switch-to-prev-buffer)
+(map! :n "H" 'switch-to-next-buffer)
+
+(map! :nv "Q" #'+format/region-or-buffer)
+(map! :n "]e" 'flycheck-next-error)
+(map! :n "[e" 'flycheck-previous-error)
+
+(with-eval-after-load 'haskell-mode
+  (map! :n "Q" 'hindent-reformat-buffer)
+  (map! :v "Q" 'hindent-reformat-region)
+  )
+;; reference gD
+;; definition gd
+;; implementation gI
+;; decalration and reference
+
+
+;; (map! (:leader
+;;         (:desc "search" :prefix "/"
+;;          :desc "Swiper"                :nv "/" #'swiper
+;;          :desc "Imenu"                 :nv "i" #'imenu
+;;          :desc "Imenu across buffers"  :nv "I" #'imenu-anywhere
+;;          :desc "Online providers"      :nv "o" #'+jump/online-select)))
+
+(map! (:leader
+       (:desc "Explain error"           :n "l" 'flycheck-explain-error-at-point)
+       (:desc "List buffer errors"      :n "d" 'flycheck-list-errors)
+       (:desc "List workspace errors"   :n "D" 'lsp-treemacs-errors-list)
+       ))
