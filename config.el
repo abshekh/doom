@@ -30,7 +30,8 @@
 ;; refresh your font settings. If Emacs still can't find your font, it likely
 ;; wasn't installed correctly. Font issues are rarely Doom issues!
 
-(setq doom-theme 'doom-horizon)
+;; (setq doom-theme 'doom-horizon)
+(setq doom-theme 'doom-one)
 
 ;; splash screen
 
@@ -44,7 +45,7 @@
                       "doomEmacsTokyoNight2.svg"
                       "doomEmacsTokyoNight3.svg")))
   (setq fancy-splash-image
-        (concat doom-private-dir "/etc/splash/resize/"
+        (concat doom-user-dir "/etc/splash/resize/"
                 (nth (random (length alternatives)) alternatives))))
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
@@ -135,15 +136,23 @@
 
 (setq lsp-lens-enable nil)
 
+(with-eval-after-load 'magit-mode
+  (add-hook 'after-save-hook 'magit-after-save-refresh-status t))
+
 ;; (add-hook 'haskell-mode-hook #'hindent-mode)
 
 (map! :n "gf" 'evil-find-file-at-point-with-line)
-(map! :n "L" 'switch-to-prev-buffer)
-(map! :n "H" 'switch-to-next-buffer)
+;; (map! :n "L" 'switch-to-prev-buffer)
+;; (map! :n "H" 'switch-to-next-buffer)
 
 (map! :nv "Q" #'+format/region-or-buffer)
 (map! :n "]e" 'flycheck-next-error)
 (map! :n "[e" 'flycheck-previous-error)
+(map! (:leader
+       (:desc "Explain error"           :n "l" 'flycheck-explain-error-at-point)
+       (:desc "List buffer errors"      :n "d" 'flycheck-list-errors)
+       (:desc "List workspace errors"   :n "D" 'lsp-treemacs-errors-list)
+       ))
 
 (with-eval-after-load 'haskell-mode
   (map! :n "Q" 'hindent-reformat-buffer)
@@ -161,9 +170,3 @@
 ;;          :desc "Imenu"                 :nv "i" #'imenu
 ;;          :desc "Imenu across buffers"  :nv "I" #'imenu-anywhere
 ;;          :desc "Online providers"      :nv "o" #'+jump/online-select)))
-
-(map! (:leader
-       (:desc "Explain error"           :n "l" 'flycheck-explain-error-at-point)
-       (:desc "List buffer errors"      :n "d" 'flycheck-list-errors)
-       (:desc "List workspace errors"   :n "D" 'lsp-treemacs-errors-list)
-       ))
