@@ -130,21 +130,25 @@
 ;;   ;; Groovy
 ;;   (add-hook 'groovy-mode-local-vars-hook #'lsp!))
 
-(setq auto-save-default t)
+(setq auto-save-default nil)
 (setq +evil-want-o/O-to-continue-comments nil)
 (setq +default-want-RET-continue-comments t)
+(setq flycheck-checker-error-threshold 9999)
 
 (setq lsp-lens-enable nil)
 
 (with-eval-after-load 'magit-mode
   (add-hook 'after-save-hook 'magit-after-save-refresh-status t))
 
-;; (add-hook 'haskell-mode-hook #'hindent-mode)
 
 (map! :n "gf" 'evil-find-file-at-point-with-line)
 ;; (map! :n "L" 'switch-to-prev-buffer)
 ;; (map! :n "H" 'switch-to-next-buffer)
 
+;; reference gD
+;; definition gd
+;; implementation gI
+;; decalration and reference
 (map! :nv "Q" #'+format/region-or-buffer)
 (map! :n "]e" 'flycheck-next-error)
 (map! :n "[e" 'flycheck-previous-error)
@@ -153,20 +157,27 @@
        (:desc "List buffer errors"      :n "d" 'flycheck-list-errors)
        (:desc "List workspace errors"   :n "D" 'lsp-treemacs-errors-list)
        ))
-
-(with-eval-after-load 'haskell-mode
-  (map! :n "Q" 'hindent-reformat-buffer)
-  (map! :v "Q" 'hindent-reformat-region)
-  )
-;; reference gD
-;; definition gd
-;; implementation gI
-;; decalration and reference
-
-
 ;; (map! (:leader
 ;;         (:desc "search" :prefix "/"
 ;;          :desc "Swiper"                :nv "/" #'swiper
 ;;          :desc "Imenu"                 :nv "i" #'imenu
 ;;          :desc "Imenu across buffers"  :nv "I" #'imenu-anywhere
 ;;          :desc "Online providers"      :nv "o" #'+jump/online-select)))
+
+;; (add-hook 'haskell-mode-hook #'hindent-mode)
+
+;; https://github.com/doomemacs/doomemacs/issues/920#issuecomment-425654279
+;; :after is the same as after!. However, you need to give this a package name,
+;; not the name of a mode or variable. You can see what package c++-mode is
+;; defined in with SPC h f c++-mode.
+;; function defined in cc-mode.el.gz --> therefore he package name is cc-mode.
+(map! :after haskell-mode
+      :map haskell-mode-map
+      :n "Q" 'hindent-reformat-buffer
+      :v "Q" 'hindent-reformat-region
+      )
+
+(map! :after json-mode
+      :map json-mode-map
+      :nv "Q" 'json-mode-beautify
+      )
