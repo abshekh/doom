@@ -9,6 +9,8 @@
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;(package! some-package)
 (package! hindent)
+(package! catppuccin-theme)
+(package! vterm :pin "f104e3a11c9ff33ccc0e086cffaadc9549e9e8b1")
 
 ;; To install a package directly from a remote git repo, you must specify a
 ;; `:recipe'. You'll find documentation on what `:recipe' accepts here:

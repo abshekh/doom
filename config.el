@@ -21,8 +21,9 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-(setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 17 :weight 'regular)
+(setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 17 :weight 'normal)
       doom-variable-pitch-font (font-spec :family "JetBrainsMono Nerd Font" :size 18)
+      doom-unicode-font (font-spec :family "JetBrainsMono Nerd Font")
       doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 32 :weight 'regular))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
@@ -30,7 +31,6 @@
 ;; refresh your font settings. If Emacs still can't find your font, it likely
 ;; wasn't installed correctly. Font issues are rarely Doom issues!
 
-;; (setq doom-theme 'doom-horizon)
 (setq doom-theme 'doom-one)
 
 ;; splash screen
@@ -57,7 +57,7 @@
 (setq org-directory "~/org/")
 
 ;; Projectile
-(setq projectile-project-search-path '("~/dev/" "~/work/"))
+(setq projectile-project-search-path '("~/dev/haskell" "~/dev/rust" "~/dev/node" "~/work/"))
 
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
@@ -133,12 +133,41 @@
 (setq auto-save-default nil)
 (setq +evil-want-o/O-to-continue-comments nil)
 (setq +default-want-RET-continue-comments t)
-(setq flycheck-checker-error-threshold 9999)
+(setq evil-split-window-below t)
+(setq evil-vsplit-window-right t)
+
+;; Set frame transparency
+;; (set-frame-parameter (selected-frame) 'alpha '(96 . 96))
+;; (add-to-list 'default-frame-alist '(alpha . (96 . 96)))
+;; (doom/set-frame-opacity 100)
+
+;; Maximize windows by default.
+(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 (setq lsp-lens-enable nil)
+(setq flycheck-checker-error-threshold 9999)
+(setq auto-revert-check-vc-info t)
 
 (with-eval-after-load 'magit-mode
   (add-hook 'after-save-hook 'magit-after-save-refresh-status t))
+
+
+;; Enable line numbers and customize their format.
+;; (column-number-mode)
+
+;; Enable line numbers for some modes
+(dolist (mode '(text-mode-hook
+                prog-mode-hook
+                conf-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 1))))
+
+;; Override some modes which derive from the above
+(dolist (mode '(org-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
+;; Reload buffer if file on disk has changed (unless local changes exist)
+(setq global-auto-revert-mode t)
 
 
 (map! :n "gf" 'evil-find-file-at-point-with-line)
@@ -157,6 +186,43 @@
        (:desc "List buffer errors"      :n "d" 'flycheck-list-errors)
        (:desc "List workspace errors"   :n "D" 'lsp-treemacs-errors-list)
        ))
+
+(map! (:leader
+       (:prefix "o"
+        (:desc "Toggle vterm popup"     :n "r" #'+vterm/toggle)
+        (:desc "Open vterm here"        :n "R" #'+vterm/here)
+        )))
+
+;; probably fixes lsp freezes
+(setq lsp-response-timeout 2)
+
+(map! :n "]c" #'+vc-gutter/next-hunk)
+(map! :n "[c" #'+vc-gutter/previous-hunk)
+
+;; make gutters look good
+(after! git-gutter-fringe
+  (setq-default fringes-outside-margins t)
+  (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
+
+(defun ediff-copy-both-to-C ()
+  (interactive)
+  (ediff-copy-diff ediff-current-difference nil 'C nil
+                   (concat
+                    (ediff-get-region-contents ediff-current-difference 'A ediff-control-buffer)
+                    (ediff-get-region-contents ediff-current-difference 'B ediff-control-buffer))))
+(defun add-c-to-ediff-mode-map () (define-key ediff-mode-map "c" 'ediff-copy-both-to-C))
+(add-hook 'ediff-keymap-setup-hook 'add-c-to-ediff-mode-map)
+
+(setq highlight-indent-guides-method 'bitmap)
+(setq highlight-indent-guides-bitmap-function 'highlight-indent-guides--bitmap-line)
+
+
+;; (setq vterm-control-seq-regexp "\e\(?:[DM78c=]\|")
+;; (setq term-prompt-regexp "\e\(?:[DM78c=]\|")
+;; (setq vterm-control-seq-regexp "\e\(?:[DM78c]\|")
+
 ;; (map! (:leader
 ;;         (:desc "search" :prefix "/"
 ;;          :desc "Swiper"                :nv "/" #'swiper
@@ -181,3 +247,25 @@
       :map json-mode-map
       :nv "Q" 'json-mode-beautify
       )
+
+;; (define-generic-mode log-mode
+;;   () () ()         ;; comment, keyword, & font lock
+;;   '("\\.log$") ;; auto load
+;;   '(log-mode-setup)
+;;   "Simple mode for log files.")
+
+;; (defun log-mode-setup ()
+;;   "Some custom setup stuff done here by mode writer."
+;;   (setq-local tab-width 4)
+;;   (setq-local indent-tabs-mode t)
+;;   (evil-local-set-key 'normal (kbd "Q") 'json-pretty-print-buffer)
+;;   (evil-local-set-key 'visual (kbd "Q") 'json-pretty-print)
+;;   ;; (map! :after config
+;;   ;;       :map log-mode-map
+;;   ;;       :n "Q" 'json-pretty-print-buffer
+;;   ;;       :v "Q" 'json-pretty-print)
+;;   ;; (column-number-mode)
+;;   ;; (display-line-numbers-mode 1)
+;;   )
+
+(add-to-list 'auto-mode-alist '("\\.log\\'" . json-mode))
