@@ -25,6 +25,11 @@
       doom-variable-pitch-font (font-spec :family "JetBrainsMono Nerd Font" :size 18)
       doom-unicode-font (font-spec :family "JetBrainsMono Nerd Font")
       doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 32 :weight 'regular))
+
+;; (setq doom-font (font-spec :family "Monocraft" :size 17 :weight 'normal)
+;;       doom-variable-pitch-font (font-spec :family "Monocraft" :size 18)
+;;       doom-unicode-font (font-spec :family "Monocraft")
+;;       doom-big-font (font-spec :family "Monocraft" :size 32 :weight 'regular))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -56,9 +61,37 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
 
-;; Projectile
-(setq projectile-project-search-path '("~/dev/haskell" "~/dev/rust" "~/dev/node" "~/work/"))
+;; (dolist (hook '(text-mode-hook org-mode-hook))
+;;       (add-hook hook (lambda () (flyspell-mode -1)))) ;; doesn't work
 
+
+;; (add-hook 'text-mode-hook (lambda () (display-line-numbers-mode 1)))
+(add-hook 'org-mode-hook (lambda () (display-line-numbers-mode 0)))
+
+(after! org
+  (add-to-list 'org-capture-templates
+               '("w" "Work-related Task" entry
+                 (file+olp+datetree "~/org/work.org")
+                 "* TODO %? \n %a"
+                 :prepend t
+                 )))
+
+
+
+;; Projectile
+(setq projectile-project-search-path '("~/dev/haskell/" "~/dev/rust/" "~/dev/node/" "~/work/"))
+
+
+(add-to-list 'auto-mode-alist '("^Dockerfile.*" . dockerfile-mode))
+
+(add-hook 'calculator-mode-hook 'hide-mode-line-mode)
+
+(after! doom-modeline
+  (remove-hook 'doom-modeline-mode-hook #'size-indication-mode) ; filesize in modeline
+  (remove-hook 'doom-modeline-mode-hook #'column-number-mode)   ; cursor column in modeline
+  (line-number-mode -1)
+  (setq mode-line-percent-position nil)
+  (setq doom-modeline-buffer-encoding nil))
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
@@ -142,29 +175,34 @@
 ;; (doom/set-frame-opacity 100)
 
 ;; Maximize windows by default.
-(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
+;; (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
+(set-frame-parameter (selected-frame) 'fullscreen 'fullboth)
 
-(setq lsp-lens-enable nil)
-(setq flycheck-checker-error-threshold 9999)
+(after! flycheck
+  (setq flycheck-checker-error-threshold 9999)
+  ;; (setq flycheck-idle-change-delay 10.0) ;; make it 2 seconds as 1 seconds seems to fast for rust
+  ;; (setq flycheck-display-errors-delay 5.0)
+  (setq lsp-ui-sideline-enable nil)
+  ;; (setq flycheck-check-syntax-automatically '(save idle-buffer-switch new-line))
+  (add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode)
+  )
+
+(setq lsp-response-timeout 2) ;; probably fixes lsp freezes
+;; (setq lsp-diagnostic-clean-after-change t) ;; errors where showing in rust on the fly (is not working)
+
 (setq auto-revert-check-vc-info t)
-
 (with-eval-after-load 'magit-mode
   (add-hook 'after-save-hook 'magit-after-save-refresh-status t))
-
 
 ;; Enable line numbers and customize their format.
 ;; (column-number-mode)
 
 ;; Enable line numbers for some modes
-(dolist (mode '(text-mode-hook
-                prog-mode-hook
-                conf-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 1))))
-
-;; Override some modes which derive from the above
-(dolist (mode '(org-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+;; (dolist (mode '(text-mode-hook
+;;                 prog-mode-hook
+;;                 conf-mode-hook))
+;;   (add-hook mode (lambda () (display-line-numbers-mode 1))))
 
 ;; Reload buffer if file on disk has changed (unless local changes exist)
 (setq global-auto-revert-mode t)
@@ -182,19 +220,18 @@
 (map! :n "]e" 'flycheck-next-error)
 (map! :n "[e" 'flycheck-previous-error)
 (map! (:leader
+       (:desc "LSP Rename"              :n "r" 'lsp-rename)
        (:desc "Explain error"           :n "l" 'flycheck-explain-error-at-point)
        (:desc "List buffer errors"      :n "d" 'flycheck-list-errors)
        (:desc "List workspace errors"   :n "D" 'lsp-treemacs-errors-list)
-       ))
+       (:prefix "c"
+                (:desc "Run Code Lens"  :n "l" 'lsp-avy-lens))))
 
 (map! (:leader
        (:prefix "o"
-        (:desc "Toggle vterm popup"     :n "r" #'+vterm/toggle)
-        (:desc "Open vterm here"        :n "R" #'+vterm/here)
-        )))
-
-;; probably fixes lsp freezes
-(setq lsp-response-timeout 2)
+                (:desc "Toggle vterm popup"     :n "r" #'+vterm/toggle)
+                (:desc "Open vterm here"        :n "R" #'+vterm/here)
+                )))
 
 (map! :n "]c" #'+vc-gutter/next-hunk)
 (map! :n "[c" #'+vc-gutter/previous-hunk)
@@ -218,11 +255,6 @@
 (setq highlight-indent-guides-method 'bitmap)
 (setq highlight-indent-guides-bitmap-function 'highlight-indent-guides--bitmap-line)
 
-
-;; (setq vterm-control-seq-regexp "\e\(?:[DM78c=]\|")
-;; (setq term-prompt-regexp "\e\(?:[DM78c=]\|")
-;; (setq vterm-control-seq-regexp "\e\(?:[DM78c]\|")
-
 ;; (map! (:leader
 ;;         (:desc "search" :prefix "/"
 ;;          :desc "Swiper"                :nv "/" #'swiper
@@ -240,32 +272,48 @@
 (map! :after haskell-mode
       :map haskell-mode-map
       :n "Q" 'hindent-reformat-buffer
-      :v "Q" 'hindent-reformat-region
-      )
+      :v "Q" 'hindent-reformat-region)
+
+;; (after! haskell-mode
+;;   (setq-mode-local lsp-lens-enable nil))
+(setq lsp-haskell-plugin-ghcide-type-lenses-global-on nil)
 
 (map! :after json-mode
       :map json-mode-map
       :nv "Q" 'json-mode-beautify
       )
 
-;; (define-generic-mode log-mode
-;;   () () ()         ;; comment, keyword, & font lock
-;;   '("\\.log$") ;; auto load
-;;   '(log-mode-setup)
-;;   "Simple mode for log files.")
+(define-generic-mode log-mode
+  () () ()         ;; comment, keyword, & font lock
+  '("\\.log")      ;; auto load
+  '(my/log-mode-setup)
+  "Simple mode for log files.")
 
-;; (defun log-mode-setup ()
-;;   "Some custom setup stuff done here by mode writer."
-;;   (setq-local tab-width 4)
-;;   (setq-local indent-tabs-mode t)
-;;   (evil-local-set-key 'normal (kbd "Q") 'json-pretty-print-buffer)
-;;   (evil-local-set-key 'visual (kbd "Q") 'json-pretty-print)
-;;   ;; (map! :after config
-;;   ;;       :map log-mode-map
-;;   ;;       :n "Q" 'json-pretty-print-buffer
-;;   ;;       :v "Q" 'json-pretty-print)
-;;   ;; (column-number-mode)
-;;   ;; (display-line-numbers-mode 1)
-;;   )
+(defun my/log-mode-setup ()
+  "Some custom setup stuff done here by mode writer."
+  (setq-local tab-width 4)
+  (setq-local indent-tabs-mode t)
+  (evil-local-set-key 'normal (kbd "Q") #'my/jq-format-logs)
+  ;; (evil-local-set-key 'normal (kbd "Q") 'json-pretty-print-buffer)
+  ;; (evil-local-set-key 'visual (kbd "Q") 'json-pretty-print)
+  ;; (map! :after config
+  ;;       :map log-mode-map
+  ;;       :n "Q" 'json-pretty-print-buffer
+  ;;       :v "Q" 'json-pretty-print)
+  ;; (column-number-mode)
+  ;; (display-line-numbers-mode 1)
+  )
 
-(add-to-list 'auto-mode-alist '("\\.log\\'" . json-mode))
+(defun my/jq-format-logs ()
+  (interactive)
+  (let* ((filename buffer-file-name)
+         (catname (concat "cat " filename))
+         (formatted-buffer (get-buffer-create "*formatted-buffer*")))
+    (unwind-protect
+        (with-current-buffer formatted-buffer
+          (erase-buffer)
+          (insert (shell-command-to-string (concat catname " | jq -R 'fromjson? | .' | jq -s . | jq 'sort_by(.messageNumber) | .[]'"))))
+      (erase-buffer)
+      (insert-buffer-substring formatted-buffer)
+      (kill-buffer formatted-buffer)
+      )))
