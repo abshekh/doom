@@ -53,6 +53,37 @@
         (concat doom-user-dir "/etc/splash/resize/"
                 (nth (random (length alternatives)) alternatives))))
 
+(setq +doom-dashboard-menu-sections
+      '(
+        ("Jump to bookmark"
+         :icon (all-the-icons-octicon "bookmark" :face 'doom-dashboard-menu-title)
+         :action bookmark-jump)
+        ("Open project"
+         :icon (all-the-icons-octicon "briefcase" :face 'doom-dashboard-menu-title)
+         :action projectile-switch-project)
+        ("Open private configuration"
+         :icon (all-the-icons-octicon "tools" :face 'doom-dashboard-menu-title)
+         :when (file-directory-p doom-private-dir)
+         :action doom/open-private-config)
+        ("Open org-agenda"
+         :icon (all-the-icons-octicon "calendar" :face 'doom-dashboard-menu-title)
+         :when (fboundp 'org-agenda)
+         :action org-agenda)
+        ("Recently opened files"
+         :icon (all-the-icons-octicon "file-text" :face 'doom-dashboard-menu-title)
+         :action recentf-open-files)
+        ("Reload last session"
+         :icon (all-the-icons-octicon "history" :face 'doom-dashboard-menu-title)
+         :when (cond ((require 'persp-mode nil t)
+                      (file-exists-p (expand-file-name persp-auto-save-fname persp-save-dir)))
+                     ((require 'desktop nil t)
+                      (file-exists-p (desktop-full-file-name))))
+         :face (:inherit (doom-dashboard-menu-title bold))
+         :action doom/quickload-session)
+        ("Open documentation"
+         :icon (all-the-icons-octicon "book" :face 'doom-dashboard-menu-title)
+         :action doom/help)))
+
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
@@ -71,11 +102,10 @@
 (after! org
   (add-to-list 'org-capture-templates
                '("w" "Work-related Task" entry
-                 (file+olp+datetree "~/org/work.org")
-                 "* TODO %? \n %a"
+                 (file+headline "~/org/work/work.org" "Work")
+                 "* TODO %? \n %i\n %a"
                  :prepend t
                  )))
-
 
 
 ;; Projectile
@@ -90,8 +120,31 @@
   (remove-hook 'doom-modeline-mode-hook #'size-indication-mode) ; filesize in modeline
   (remove-hook 'doom-modeline-mode-hook #'column-number-mode)   ; cursor column in modeline
   (line-number-mode -1)
+  ;; (setq doom-modeline-bar-width 0) ; remove vertical bar from modeline
   (setq mode-line-percent-position nil)
   (setq doom-modeline-buffer-encoding nil))
+
+;; hjkl in dired
+(evil-define-key 'normal dired-mode-map
+  (kbd "h") 'dired-up-directory
+  (kbd "l") 'dired-find-file
+  )
+
+;; command window
+(eval-after-load 'evil-vars
+  '(define-key evil-ex-completion-map (kbd "C-f") 'evil-ex-command-window))
+(eval-after-load 'evil-vars
+  '(define-key evil-ex-search-keymap (kbd "C-f") 'evil-ex-search-command-window))
+
+(use-package dwim-shell-command
+  :ensure t
+  :bind (([remap shell-command] . dwim-shell-command)
+         :map dired-mode-map
+         ([remap dired-do-async-shell-command] . dwim-shell-command)
+         ([remap dired-do-shell-command] . dwim-shell-command)
+         ([remap dired-smart-shell-command] . dwim-shell-command))
+  )
+(require 'dwim-shell-commands)
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
@@ -172,12 +225,18 @@
 ;; Set frame transparency
 ;; (set-frame-parameter (selected-frame) 'alpha '(96 . 96))
 ;; (add-to-list 'default-frame-alist '(alpha . (96 . 96)))
-;; (doom/set-frame-opacity 100)
+
+;; (doom/set-frame-opacity 96)
+;; (add-to-list 'default-frame-alist '(alpha . 96))
 
 ;; Maximize windows by default.
 ;; (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
 ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
-(set-frame-parameter (selected-frame) 'fullscreen 'fullboth)
+
+;; (set-frame-parameter (selected-frame) 'fullscreen 'fullboth)
+
+;; (add-to-list 'default-frame-alist '(fullscreen . fullscreen))
+(set-frame-parameter (selected-frame) 'fullscreen 'fullscreen) ;; for mac
 
 (after! flycheck
   (setq flycheck-checker-error-threshold 9999)
