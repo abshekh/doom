@@ -1,26 +1,8 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
-;; Place your private configuration here! Remember, you do not need to run 'doom
-;; sync' after modifying this file!
-
-
-;; Some functionality uses this to identify you, e.g. GPG configuration, email
-;; clients, file templates and snippets. It is optional.
 (setq user-full-name "Abhishek Singh"
       user-mail-address "john@doe.com")
 
-;; Doom exposes five (optional) variables for controlling fonts in Doom:
-;;
-;; - `doom-font' -- the primary font to use
-;; - `doom-variable-pitch-font' -- a non-monospace font (where applicable)
-;; - `doom-big-font' -- used for `doom-big-font-mode'; use this for
-;;   presentations or streaming.
-;; - `doom-unicode-font' -- for unicode glyphs
-;; - `doom-serif-font' -- for the `fixed-pitch-serif' face
-;;
-;; See 'C-h v doom-font' for documentation and more examples of what they
-;; accept. For example:
-;;
 (setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 17 :weight 'normal)
       doom-variable-pitch-font (font-spec :family "JetBrainsMono Nerd Font" :size 18)
       doom-unicode-font (font-spec :family "JetBrainsMono Nerd Font")
@@ -31,10 +13,6 @@
 ;;       doom-unicode-font (font-spec :family "Monocraft")
 ;;       doom-big-font (font-spec :family "Monocraft" :size 32 :weight 'regular))
 ;;
-;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
-;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
-;; refresh your font settings. If Emacs still can't find your font, it likely
-;; wasn't installed correctly. Font issues are rarely Doom issues!
 
 (setq doom-theme 'doom-one)
 
@@ -78,18 +56,14 @@
                       (file-exists-p (expand-file-name persp-auto-save-fname persp-save-dir)))
                      ((require 'desktop nil t)
                       (file-exists-p (desktop-full-file-name))))
-         :face (:inherit (doom-dashboard-menu-title bold))
+         ;; :face (:inherit (doom-dashboard-menu-title bold))
          :action doom/quickload-session)
         ("Open documentation"
          :icon (all-the-icons-octicon "book" :face 'doom-dashboard-menu-title)
          :action doom/help)))
 
-;; This determines the style of line numbers in effect. If set to `nil', line
-;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
 
-;; If you use `org' and don't want your org files in the default location below,
-;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
 
 ;; (dolist (hook '(text-mode-hook org-mode-hook))
@@ -121,6 +95,7 @@
   (remove-hook 'doom-modeline-mode-hook #'column-number-mode)   ; cursor column in modeline
   (line-number-mode -1)
   ;; (setq doom-modeline-bar-width 0) ; remove vertical bar from modeline
+  (setq doom-modeline-vcs-max-length 25)
   (setq mode-line-percent-position nil)
   (setq doom-modeline-buffer-encoding nil))
 
@@ -146,37 +121,6 @@
   )
 (require 'dwim-shell-commands)
 
-;; Whenever you reconfigure a package, make sure to wrap your config in an
-;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
-;;
-;;   (after! PACKAGE
-;;     (setq x y))
-;;
-;; The exceptions to this rule:
-;;
-;;   - Setting file/directory variables (like `org-directory')
-;;   - Setting variables which explicitly tell you to set them before their
-;;     package is loaded (see 'C-h v VARIABLE' to look up their documentation).
-;;   - Setting doom variables (which start with 'doom-' or '+').
-;;
-;; Here are some additional functions/macros that will help you configure Doom.
-;;
-;; - `load!' for loading external *.el files relative to this one
-;; - `use-package!' for configuring packages
-;; - `after!' for running code after a package has loaded
-;; - `add-load-path!' for adding directories to the `load-path', relative to
-;;   this file. Emacs searches the `load-path' when you load packages with
-;;   `require' or `use-package'.
-;; - `map!' for binding new keys
-;;
-;; To get information about any of these functions/macros, move the cursor over
-;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
-;; This will open documentation for it, including demos of how they are used.
-;; Alternatively, use `C-h o' to look up a symbol (functions, variables, faces,
-;; etc).
-;;
-;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
-;; they are implemented.
 
 ;; resize windows with ctrl arrow keys
 (global-set-key (kbd "<C-down>") 'shrink-window)
@@ -185,36 +129,17 @@
 (global-set-key (kbd "<C-left>") 'enlarge-window-horizontally)
 
 ;; lang/java
-
-;; Enforce Google Java Code Style
-;; See https://google.github.io/styleguide/javaguide.html
-;; (when (featurep! :lang java)
-;;   (when (featurep! :lang java +lsp)
-;;     (setq
-;;      lsp-java-format-settings-url "http://google.github.io/styleguide/eclipse-java-google-style.xml"))
-;;   (set-formatter! 'google-java-format
-;;     '("google-java-format" "-")
-;;     :modes 'java-mode)
-;;   (setq-hook! 'java-mode-hook
-;;     tab-width 2
-;;     fill-column 100))
-
-;; (when (featurep! :lang java +lsp)
-;;   (setq lsp-java-maven-download-sources t
-;;         lsp-java-autobuild-enabled nil
-;;         lsp-java-selection-enabled nil
-;;         lsp-java-code-generation-use-blocks t
-;;         lsp-java-code-generation-generate-comments t
-;;         lsp-java-code-generation-to-string-code-style "STRING_BUILDER")
-
-;;   ;; Lombok support
-;;   ;; See https://github.com/redhat-developer/vscode-java/wiki/Lombok-support
-;;   (after! lsp-java
-;;     (push (concat "-javaagent:" (expand-file-name (concat doom-private-dir "etc/lombok/lombok-1.18.25.jar")))
-;;           lsp-java-vmargs))
-
-;;   ;; Groovy
-;;   (add-hook 'groovy-mode-local-vars-hook #'lsp!))
+(add-hook 'java-mode-hook #'lsp-java-lens-mode)
+(setq-hook! 'java-mode-hook
+  tab-width 2
+  c-basic-offset 2
+  fill-column 100)
+(after! lsp-java
+  (push (concat "-javaagent:" (expand-file-name (concat doom-user-dir "etc/lombok/lombok-1.18.25.jar")))
+        lsp-java-vmargs))
+(after! java-mode
+  (setq lsp-java-format-settings-url "http://google.github.io/styleguide/eclipse-java-google-style.xml")
+  (setq lsp-java-format-settings-profile "GoogleStyle"))
 
 (setq auto-save-default nil)
 (setq +evil-want-o/O-to-continue-comments nil)
@@ -245,7 +170,15 @@
   (setq lsp-ui-sideline-enable nil)
   ;; (setq flycheck-check-syntax-automatically '(save idle-buffer-switch new-line))
   (add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode)
+  ;; (add-hook 'flycheck-popup-tip-mode-hook 'flycheck-popup-tip-error-prefix "")
+  ;; (add-hook 'flycheck-popup-tip-mode-hook (lambda () (flycheck-popup-tip-error-prefix "")))
   )
+(after! flycheck-popup-tip
+  (setq flycheck-popup-tip-error-prefix "")
+  )
+;; (after! flycheck-popup-tip-mode
+;;   (setq flycheck-popup-tip-error-prefix "")
+;;   )
 
 (setq lsp-response-timeout 2) ;; probably fixes lsp freezes
 ;; (setq lsp-diagnostic-clean-after-change t) ;; errors where showing in rust on the fly (is not working)
@@ -376,3 +309,8 @@
       (insert-buffer-substring formatted-buffer)
       (kill-buffer formatted-buffer)
       )))
+
+;; python
+(after! lsp-pyright
+  (add-hook 'conda-postactivate-hook (lambda () (lsp-restart-workspace)))
+  (add-hook 'conda-postdeactivate-hook (lambda () (lsp-restart-workspace))))
