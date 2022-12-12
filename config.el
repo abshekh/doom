@@ -14,22 +14,24 @@
 ;;       doom-big-font (font-spec :family "Monocraft" :size 32 :weight 'regular))
 ;;
 
-(setq doom-theme 'doom-one)
+(setq doom-theme 'doom-nord)
 
 ;; splash screen
 
-(let ((alternatives '("doomEmacs.svg"
-                      "doomEmacsDoomOne.svg"
-                      "doomEmacsDracula.svg"
-                      "doomEmacsGruvbox.svg"
-                      "doomEmacsRouge.svg"
-                      "doomEmacsSolarized.svg"
-                      "doomEmacsTokyoNight.svg"
-                      "doomEmacsTokyoNight2.svg"
-                      "doomEmacsTokyoNight3.svg")))
-  (setq fancy-splash-image
-        (concat doom-user-dir "/etc/splash/resize/"
-                (nth (random (length alternatives)) alternatives))))
+;; (let ((alternatives '("doomEmacs.svg"
+;;                       "doomEmacsDoomOne.svg"
+;;                       "doomEmacsDracula.svg"
+;;                       "doomEmacsGruvbox.svg"
+;;                       "doomEmacsRouge.svg"
+;;                       "doomEmacsSolarized.svg"
+;;                       "doomEmacsTokyoNight.svg"
+;;                       "doomEmacsTokyoNight2.svg"
+;;                       "doomEmacsTokyoNight3.svg")))
+;;   (setq fancy-splash-image
+;;         (concat doom-user-dir "/etc/splash/resize/"
+;;                 (nth (random (length alternatives)) alternatives))))
+
+(setq fancy-splash-image (concat doom-user-dir "/etc/splash/blackhole.png"))
 
 (setq +doom-dashboard-menu-sections
       '(
@@ -58,9 +60,10 @@
                       (file-exists-p (desktop-full-file-name))))
          ;; :face (:inherit (doom-dashboard-menu-title bold))
          :action doom/quickload-session)
-        ("Open documentation"
-         :icon (all-the-icons-octicon "book" :face 'doom-dashboard-menu-title)
-         :action doom/help)))
+        ;; ("Open documentation"
+        ;;  :icon (all-the-icons-octicon "book" :face 'doom-dashboard-menu-title)
+        ;;  :action doom/help)
+        ))
 
 (setq display-line-numbers-type t)
 
@@ -110,6 +113,8 @@
   '(define-key evil-ex-completion-map (kbd "C-f") 'evil-ex-command-window))
 (eval-after-load 'evil-vars
   '(define-key evil-ex-search-keymap (kbd "C-f") 'evil-ex-search-command-window))
+(add-hook 'evil-command-window-mode-hook #'turn-off-smartparens-mode)
+(add-hook 'minibuffer-setup-hook #'turn-off-smartparens-mode)
 
 (use-package dwim-shell-command
   :ensure t
@@ -130,6 +135,10 @@
 
 ;; lang/java
 (add-hook 'java-mode-hook #'lsp-java-lens-mode)
+;; (add-hook 'lsp-mode-hook #'lsp-lens-mode)
+;; (add-hook 'java-mode-hook #'lsp-jt-lens-mode)
+;; (add-hook 'lsp-jt-mode-hook #'lsp-jt-lens-mode)
+
 (setq-hook! 'java-mode-hook
   tab-width 2
   c-basic-offset 2
