@@ -1,5 +1,9 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
+;; embark collect - <c-c><c-l>
+;; embark export  - E
+;; embark edit    - i
+
 (setq user-full-name "Abhishek Singh"
       user-mail-address "john@doe.com")
 
@@ -14,7 +18,14 @@
 ;;       doom-big-font (font-spec :family "Monocraft" :size 32 :weight 'regular))
 ;;
 
-(setq doom-theme 'doom-nord)
+;; (use-package autothemer :ensure t)
+;; (setq doom-theme 'doom-one)
+
+;; (custom-set-faces!
+;;    `(mode-line :background ,(doom-color 'bg-alt))
+;;    `(mode-line-inactive :background ,(doom-color 'bg-alt))
+;;    `(doom-modeline-bar :background ,(doom-color 'bg-alt))
+;;   )
 
 ;; splash screen
 
@@ -138,6 +149,8 @@
 ;; (add-hook 'lsp-mode-hook #'lsp-lens-mode)
 ;; (add-hook 'java-mode-hook #'lsp-jt-lens-mode)
 ;; (add-hook 'lsp-jt-mode-hook #'lsp-jt-lens-mode)
+;; (add-hook 'lsp-java-lens-mode-hook #'lsp-jt-lens-mode)
+;; (add-to-list 'auto-mode-alist '("\\.java\\'" . lsp-jt-lens-mode))
 
 (setq-hook! 'java-mode-hook
   tab-width 2
@@ -147,6 +160,7 @@
   (push (concat "-javaagent:" (expand-file-name (concat doom-user-dir "etc/lombok/lombok-1.18.25.jar")))
         lsp-java-vmargs))
 (after! java-mode
+  ;; (add-hook 'java-mode-hook (lambda () (lsp-jt-lens-mode 1)))
   (setq lsp-java-format-settings-url "http://google.github.io/styleguide/eclipse-java-google-style.xml")
   (setq lsp-java-format-settings-profile "GoogleStyle"))
 
@@ -323,3 +337,11 @@
 (after! lsp-pyright
   (add-hook 'conda-postactivate-hook (lambda () (lsp-restart-workspace)))
   (add-hook 'conda-postdeactivate-hook (lambda () (lsp-restart-workspace))))
+
+;; pdf tools
+(add-hook 'pdf-tools-enabled-hook 'pdf-view-midnight-minor-mode)
+(evil-collection-define-key 'normal 'pdf-view-mode-map
+  "/" 'pdf-occur)
+(evil-collection-define-key 'normal 'pdf-occur-buffer-mode-map
+  "n" (lambda () (interactive) (forward-line) (pdf-occur-view-occurrence))
+  "N" (lambda () (interactive) (forward-line -1) (pdf-occur-view-occurrence)))
