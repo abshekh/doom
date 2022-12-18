@@ -211,8 +211,10 @@
   (add-hook 'after-save-hook 'magit-after-save-refresh-status t))
 (setq magit-blame-styles ;; vertical blame
       '((margin
-         (margin-width . 60)
-         (margin-format . ("%.6H %a %C %s"))
+         ;; (margin-width . 60)
+         (margin-width . 40)
+         ;; (margin-format . ("%.6H %-15.15a %C %s"))
+         (margin-format . ("%.6H %-15.15a %C"))
          (margin-face . (magit-blame-margin))
          (margin-body-face . (magit-blame-dimmed))
          (show-message . t)
