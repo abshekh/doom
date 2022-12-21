@@ -1,5 +1,6 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
+;; TODO: change lsp settings to use package
 ;; embark collect - <c-c><c-l>
 ;; embark export  - E
 ;; embark edit    - i
@@ -12,14 +13,8 @@
       doom-unicode-font (font-spec :family "JetBrainsMono Nerd Font")
       doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 32 :weight 'regular))
 
-;; (setq doom-font (font-spec :family "Monocraft" :size 17 :weight 'normal)
-;;       doom-variable-pitch-font (font-spec :family "Monocraft" :size 18)
-;;       doom-unicode-font (font-spec :family "Monocraft")
-;;       doom-big-font (font-spec :family "Monocraft" :size 32 :weight 'regular))
-;;
-
 ;; (use-package autothemer :ensure t)
-;; (setq doom-theme 'doom-one)
+(setq doom-theme 'doom-moonfly)
 
 ;; (custom-set-faces!
 ;;    `(mode-line :background ,(doom-color 'bg-alt))
@@ -76,7 +71,7 @@
         ;;  :action doom/help)
         ))
 
-(setq display-line-numbers-type t)
+(setq display-line-numbers-type 'relative)
 
 (setq org-directory "~/org/")
 
@@ -212,7 +207,7 @@
 (setq magit-blame-styles ;; vertical blame
       '((margin
          ;; (margin-width . 60)
-         (margin-width . 40)
+         (margin-width . 39)
          ;; (margin-format . ("%.6H %-15.15a %C %s"))
          (margin-format . ("%.6H %-15.15a %C"))
          (margin-face . (magit-blame-margin))
@@ -257,6 +252,12 @@
                 (:desc "Toggle vterm popup"     :n "r" #'+vterm/toggle)
                 (:desc "Open vterm here"        :n "R" #'+vterm/here)
                 )))
+(setq compilation-skip-threshold 2) ;; skip warings in compilation mode
+(map! :after compile
+      :map compilation-mode-map
+      :n "]e" 'next-error
+      :n "[e" 'previous-error)
+
 
 (map! :n "]c" #'+vc-gutter/next-hunk)
 (map! :n "[c" #'+vc-gutter/previous-hunk)
@@ -302,6 +303,28 @@
 ;; (after! haskell-mode
 ;;   (setq-mode-local lsp-lens-enable nil))
 (setq lsp-haskell-plugin-ghcide-type-lenses-global-on nil)
+;; (setq compilation-error-regexp-alist-alist
+;;         ;; Tip: M-x re-builder to test this out
+;;         (cons '(stack "^\\(.+?\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\): error:"
+
+;;                            1 ;; file
+;;                            2 ;; line
+;;                            3 ;; column
+;;                            )
+;;               compilation-error-regexp-alist-alist))
+;; (add-to-list 'compilation-error-regexp-alist-alist '(haskell "^\\(.+?\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\): error:" 1 2 3))
+
+;; (after! compile
+;;   (add-to-list 'compilation-error-regexp-alist 'stack)
+;;   ;; (add-to-list 'compilation-error-regexp-alist-alist '(stack "^\\(.+?\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\): error:" 1 2 3))
+;;   (add-to-list 'compilation-error-regexp-alist-alist '(stack "^\\(.+?\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\): [^w]rror:" 1 2))
+;;   )
+;; (after! compile
+;;   (add-to-list 'compilation-error-regexp-alist-alist '(bloop "^\\[E\\] \\([A-Za-z0-9\\._/-]+\\):\\([0-9]+\\):\\([0-9]+\\):.*$" 1 2 3))
+;;   (add-to-list 'compilation-error-regexp-alist 'bloop))
+
+;; (add-to-list 'compilation-error-regexp-alist 'haskell)
+;; (add-to-list 'compilation-error-regexp-alist-alist '(haskell "^\\(.+?\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\): error:" 1 2 3))
 
 (map! :after json-mode
       :map json-mode-map
@@ -349,21 +372,13 @@
   (add-hook 'conda-postdeactivate-hook (lambda () (lsp-restart-workspace))))
 
 ;; pdf tools, maybe look into evil pdf tools in the future
-(add-hook 'pdf-tools-enabled-hook 'pdf-view-midnight-minor-mode)
-(evil-collection-define-key 'normal 'pdf-view-mode-map
-  "/" 'pdf-occur)
-(evil-collection-define-key 'normal 'pdf-occur-buffer-mode-map
-  "n" (lambda () (interactive) (forward-line) (pdf-occur-view-occurrence))
-  "N" (lambda () (interactive) (forward-line -1) (pdf-occur-view-occurrence)))
-
-
-;; (map! :after haskell-mode
-;;       :map haskell-mode-map
-;;       :n "Q" 'hindent-reformat-buffer
-;;       :v "Q" 'hindent-reformat-region)
-
-;; (map! :map pdf-view-mode-map
-;;       :n "/" 'pdf-occur)
-;; (map! :map pdf-occur-buffer-mode-map
-;;       :n "n" (lambda () (interactive) (forward-line) (pdf-occur-view-occurrence))
-;;       :n "N" (lambda () (interactive) (forward-line -1) (pdf-occur-view-occurrence)))
+(use-package pdf-tools
+  :hook (pdf-tools-enabled . pdf-view-midnight-minor-mode)
+  :config
+  (map! :after pdf-view
+        :map pdf-view-mode-map
+        :n "/" 'pdf-occur)
+  (map! :after pdf-occur
+        :map pdf-occur-buffer-mode-map
+        :n "n" (lambda () (interactive) (forward-line) (pdf-occur-view-occurrence))
+        :n "N" (lambda () (interactive) (forward-line -1) (pdf-occur-view-occurrence))))
