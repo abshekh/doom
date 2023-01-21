@@ -10,8 +10,10 @@
                                         ;(package! some-package)
 (package! hindent)
 (package! vterm :pin "d6fcd38b9544dd4d05dbe5db10e950043b68de9c") ;; doom package, different version
-(package! pdf-tools :pin "d6980bc3273e1cf1a73feee6bb523d1568405685") ;; doom package, different version
+;; (package! pdf-tools :pin "d6980bc3273e1cf1a73feee6bb523d1568405685") ;; doom package, different version
 (package! dwim-shell-command)
+(package! ssh)
+
 
 (package! green-screen-theme)
 (package! autothemer)

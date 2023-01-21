@@ -14,7 +14,7 @@
       doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 32 :weight 'regular))
 
 ;; (use-package autothemer :ensure t)
-(setq doom-theme 'doom-moonfly)
+;; (setq doom-theme 'doom-moonfly)
 
 ;; (custom-set-faces!
 ;;    `(mode-line :background ,(doom-color 'bg-alt))
@@ -178,8 +178,8 @@
 
 ;; (set-frame-parameter (selected-frame) 'fullscreen 'fullboth)
 
-;; (add-to-list 'default-frame-alist '(fullscreen . fullscreen))
-(set-frame-parameter (selected-frame) 'fullscreen 'fullscreen) ;; for mac
+(add-to-list 'default-frame-alist '(fullscreen . fullscreen))
+;; (set-frame-parameter (selected-frame) 'fullscreen 'fullscreen) ;; for mac
 
 (after! flycheck
   (setq flycheck-checker-error-threshold 9999)
@@ -303,6 +303,14 @@
 ;; (after! haskell-mode
 ;;   (setq-mode-local lsp-lens-enable nil))
 (setq lsp-haskell-plugin-ghcide-type-lenses-global-on nil)
+(setq lsp-haskell-plugin-import-lens-code-lens-on nil)
+(setq lsp-haskell-plugin-import-lens-code-actions-on nil)
+
+(setq-hook! 'haskell-mode-hook
+  lsp-lens-enable nil)
+;; (after! haskell-mode
+;;   (setq lsp-lens-enable nil))
+
 ;; (setq compilation-error-regexp-alist-alist
 ;;         ;; Tip: M-x re-builder to test this out
 ;;         (cons '(stack "^\\(.+?\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\): error:"
@@ -372,13 +380,19 @@
   (add-hook 'conda-postdeactivate-hook (lambda () (lsp-restart-workspace))))
 
 ;; pdf tools, maybe look into evil pdf tools in the future
-(use-package pdf-tools
-  :hook (pdf-tools-enabled . pdf-view-midnight-minor-mode)
-  :config
-  (map! :after pdf-view
-        :map pdf-view-mode-map
-        :n "/" 'pdf-occur)
-  (map! :after pdf-occur
-        :map pdf-occur-buffer-mode-map
-        :n "n" (lambda () (interactive) (forward-line) (pdf-occur-view-occurrence))
-        :n "N" (lambda () (interactive) (forward-line -1) (pdf-occur-view-occurrence))))
+;; (use-package pdf-tools
+;;   :hook (pdf-tools-enabled . pdf-view-midnight-minor-mode)
+;;   :config
+;;   (map! :after pdf-view
+;;         :map pdf-view-mode-map
+;;         :n "/" 'pdf-occur)
+;;   (map! :after pdf-occur
+;;         :map pdf-occur-buffer-mode-map
+;;         :n "n" (lambda () (interactive) (forward-line) (pdf-occur-view-occurrence))
+;;         :n "N" (lambda () (interactive) (forward-line -1) (pdf-occur-view-occurrence))))
+(require 'ssh)
+(add-hook 'ssh-mode-hook
+          (lambda ()
+            (setq ssh-directory-tracking-mode t)
+            (shell-dirtrack-mode t)
+            (setq dirtrackp nil)))
