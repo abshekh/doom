@@ -92,7 +92,7 @@
 
 
 ;; Projectile
-(setq projectile-project-search-path '("~/dev/haskell/" "~/dev/rust/" "~/dev/node/" "~/work/"))
+(setq projectile-project-search-path '("~/dev/" "~/work/"))
 
 
 (add-to-list 'auto-mode-alist '("^Dockerfile.*" . dockerfile-mode))
@@ -121,6 +121,7 @@
   '(define-key evil-ex-search-keymap (kbd "C-f") 'evil-ex-search-command-window))
 (add-hook 'evil-command-window-mode-hook #'turn-off-smartparens-mode)
 (add-hook 'minibuffer-setup-hook #'turn-off-smartparens-mode)
+(add-hook 'lisp-mode-hook #'turn-off-smartparens-mode)
 
 (use-package dwim-shell-command
   :ensure t
@@ -158,6 +159,13 @@
   ;; (add-hook 'java-mode-hook (lambda () (lsp-jt-lens-mode 1)))
   (setq lsp-java-format-settings-url "http://google.github.io/styleguide/eclipse-java-google-style.xml")
   (setq lsp-java-format-settings-profile "GoogleStyle"))
+
+;; to run current file
+(add-hook 'java-mode-hook
+          (lambda ()
+            (set (make-local-variable 'compile-command)
+                 (format "java %s" (buffer-file-name)))))
+
 
 (setq auto-save-default nil)
 (setq +evil-want-o/O-to-continue-comments nil)
@@ -380,19 +388,66 @@
   (add-hook 'conda-postdeactivate-hook (lambda () (lsp-restart-workspace))))
 
 ;; pdf tools, maybe look into evil pdf tools in the future
-;; (use-package pdf-tools
-;;   :hook (pdf-tools-enabled . pdf-view-midnight-minor-mode)
-;;   :config
-;;   (map! :after pdf-view
-;;         :map pdf-view-mode-map
-;;         :n "/" 'pdf-occur)
-;;   (map! :after pdf-occur
-;;         :map pdf-occur-buffer-mode-map
-;;         :n "n" (lambda () (interactive) (forward-line) (pdf-occur-view-occurrence))
-;;         :n "N" (lambda () (interactive) (forward-line -1) (pdf-occur-view-occurrence))))
+(use-package pdf-tools
+  :hook (pdf-tools-enabled . pdf-view-midnight-minor-mode)
+  :config
+  (map! :after pdf-view
+        :map pdf-view-mode-map
+        :n "/" 'pdf-occur)
+  (map! :after pdf-occur
+        :map pdf-occur-buffer-mode-map
+        :n "n" (lambda () (interactive) (forward-line) (pdf-occur-view-occurrence))
+        :n "N" (lambda () (interactive) (forward-line -1) (pdf-occur-view-occurrence))))
 (require 'ssh)
 (add-hook 'ssh-mode-hook
           (lambda ()
             (setq ssh-directory-tracking-mode t)
             (shell-dirtrack-mode t)
             (setq dirtrackp nil)))
+
+
+;; (progn
+;;   (progn
+;;     (+workspace/new "newton-hs")
+;;     (find-file "~/work/newton-hs"))
+;;   (progn
+;;     (+workspace/new "newton-hs-tools")
+;;     (find-file "~/work/newton-hs-tools"))
+;;   )
+;; (require 'cl-format)
+
+;; (split-string (+workspace/display) "\\[[0-9]\\]")
+
+;; (defun get-workspaces ()
+;;     (message "%s" (member "#1" (mapcar #'string-trim (split-string (+workspace/display) "\\[[0-9]\\]")))))
+
+(defun abshekh/get-workspaces ()
+  (mapcar #'string-trim (split-string (+workspace/display) "\\[[0-9]\\]")))
+
+(defun abshekh/create-project-workspace (workspaces workspace-name workspace-path)
+  (unless (member workspace-name workspaces)
+    (progn
+        (+workspace/new workspace-name)
+        (find-file workspace-path))))
+
+(defun abshekh/delete-project-workspace (workspaces workspace-name)
+  (let ((default-kill-buffer-query-functions kill-buffer-query-functions))
+  (when (member workspace-name workspaces)
+    (progn
+        (setq kill-buffer-query-functions nil)
+        (+workspace-delete workspace-name)
+        (+workspace/cycle 1)
+        (setq kill-buffer-query-functions default-kill-buffer-query-functions)))))
+
+(defun abshekh/setup-dev ()
+  (interactive)
+  (let*
+    ((workspaces (abshekh/get-workspaces)))
+    (progn
+      (abshekh/create-project-workspace workspaces "newton-hs" "~/work/newton-hs"))))
+
+(defun abshekh/flush-dev ()
+  (interactive)
+  (let*
+    ((workspaces (abshekh/get-workspaces)))
+    (abshekh/delete-project-workspace workspaces "newton-hs")))
