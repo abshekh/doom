@@ -13,6 +13,8 @@
       doom-unicode-font (font-spec :family "JetBrainsMono Nerd Font")
       doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 32 :weight 'regular))
 
+(load (concat doom-user-dir "work-setup.el"))
+
 ;; (use-package autothemer :ensure t)
 ;; (setq doom-theme 'doom-moonfly)
 
@@ -398,6 +400,7 @@
         :map pdf-occur-buffer-mode-map
         :n "n" (lambda () (interactive) (forward-line) (pdf-occur-view-occurrence))
         :n "N" (lambda () (interactive) (forward-line -1) (pdf-occur-view-occurrence))))
+
 (require 'ssh)
 (add-hook 'ssh-mode-hook
           (lambda ()
@@ -406,48 +409,14 @@
             (setq dirtrackp nil)))
 
 
-;; (progn
-;;   (progn
-;;     (+workspace/new "newton-hs")
-;;     (find-file "~/work/newton-hs"))
-;;   (progn
-;;     (+workspace/new "newton-hs-tools")
-;;     (find-file "~/work/newton-hs-tools"))
-;;   )
-;; (require 'cl-format)
+;; set default projectile name in mode line
+;; probabaly this was causing ssh over tramp to slow
+;; still not verified
+(setq projectile-mode-line "Projectile")
 
-;; (split-string (+workspace/display) "\\[[0-9]\\]")
-
-;; (defun get-workspaces ()
-;;     (message "%s" (member "#1" (mapcar #'string-trim (split-string (+workspace/display) "\\[[0-9]\\]")))))
-
-(defun abshekh/get-workspaces ()
-  (mapcar #'string-trim (split-string (+workspace/display) "\\[[0-9]\\]")))
-
-(defun abshekh/create-project-workspace (workspaces workspace-name workspace-path)
-  (unless (member workspace-name workspaces)
-    (progn
-        (+workspace/new workspace-name)
-        (find-file workspace-path))))
-
-(defun abshekh/delete-project-workspace (workspaces workspace-name)
-  (let ((default-kill-buffer-query-functions kill-buffer-query-functions))
-  (when (member workspace-name workspaces)
-    (progn
-        (setq kill-buffer-query-functions nil)
-        (+workspace-delete workspace-name)
-        (+workspace/cycle 1)
-        (setq kill-buffer-query-functions default-kill-buffer-query-functions)))))
-
-(defun abshekh/setup-dev ()
-  (interactive)
-  (let*
-    ((workspaces (abshekh/get-workspaces)))
-    (progn
-      (abshekh/create-project-workspace workspaces "newton-hs" "~/work/newton-hs"))))
-
-(defun abshekh/flush-dev ()
-  (interactive)
-  (let*
-    ((workspaces (abshekh/get-workspaces)))
-    (abshekh/delete-project-workspace workspaces "newton-hs")))
+;; install shfmt with this
+;; nix-env -iA nixpkgs.shfmt
+(map! :after sh-mode
+      :map sh-mode-map
+      :n "Q" 'shfmt-buffer
+      :v "Q" 'shfmt-region)

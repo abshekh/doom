@@ -13,6 +13,7 @@
 ;; (package! pdf-tools :pin "d6980bc3273e1cf1a73feee6bb523d1568405685") ;; doom package, different version
 (package! dwim-shell-command)
 (package! ssh)
+(package! shfmt)
 
 
 (package! green-screen-theme)
