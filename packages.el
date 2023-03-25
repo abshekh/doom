@@ -9,17 +9,18 @@
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
                                         ;(package! some-package)
 (package! hindent)
-(package! vterm :pin "d6fcd38b9544dd4d05dbe5db10e950043b68de9c") ;; doom package, different version
+;; (package! vterm :pin "d6fcd38b9544dd4d05dbe5db10e950043b68de9c") ;; doom package, different version
 ;; (package! pdf-tools :pin "d6980bc3273e1cf1a73feee6bb523d1568405685") ;; doom package, different version
 (package! dwim-shell-command)
-(package! ssh)
+;; (package! ssh)
 (package! shfmt)
+(package! ob-restclient)
 
 
-(package! green-screen-theme)
-(package! autothemer)
-(package! rose-pine-emacs
-  :recipe (:host github :repo "thongpv87/rose-pine-emacs" :branch "master"))
+;; (package! green-screen-theme)
+;; (package! autothemer)
+;; (package! rose-pine-emacs
+;;   :recipe (:host github :repo "thongpv87/rose-pine-emacs" :branch "master"))
 
 ;; To install a package directly from a remote git repo, you must specify a
 ;; `:recipe'. You'll find documentation on what `:recipe' accepts here:

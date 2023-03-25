@@ -12,7 +12,7 @@
             (make-work-setup-dev
              :workspace-name "npci-mocking"
              :path "~/work/npci-mocking"
-             :cmd '("nvm use 8" "node app.js"))
+             :cmd '("node app.js"))
             (make-work-setup-dev
              :workspace-name "pgres"
              :path "~/"

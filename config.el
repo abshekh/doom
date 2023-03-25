@@ -8,20 +8,24 @@
 (setq user-full-name "Abhishek Singh"
       user-mail-address "john@doe.com")
 
-(setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 17 :weight 'normal)
-      doom-variable-pitch-font (font-spec :family "JetBrainsMono Nerd Font" :size 18)
-      doom-unicode-font (font-spec :family "JetBrainsMono Nerd Font")
-      doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 32 :weight 'regular))
+;; (setq-local abshekh/font "JetBrainsMono Nerd Font")
+(setq-local abshekh/font "Iosevka Term")
+
+(setq doom-font (font-spec :family abshekh/font :size 19 :weight 'normal)
+      doom-variable-pitch-font (font-spec :family abshekh/font :size 20)
+      doom-unicode-font (font-spec :family abshekh/font)
+      doom-big-font (font-spec :family abshekh/font :size 32 :weight 'regular))
 
 (load (concat doom-user-dir "work-setup.el"))
 
 ;; (use-package autothemer :ensure t)
 ;; (setq doom-theme 'doom-moonfly)
+;; (setq doom-theme 'doom-monokai-pro)
 
 ;; (custom-set-faces!
-;;    `(mode-line :background ,(doom-color 'bg-alt))
-;;    `(mode-line-inactive :background ,(doom-color 'bg-alt))
-;;    `(doom-modeline-bar :background ,(doom-color 'bg-alt))
+;;   `(mode-line :background ,(doom-color 'bg-alt))
+;;   `(mode-line-inactive :background ,(doom-color 'bg-alt))
+;;   `(doom-modeline-bar :background ,(doom-color 'bg-alt))
 ;;   )
 
 ;; splash screen
@@ -40,38 +44,38 @@
 ;;                 (nth (random (length alternatives)) alternatives))))
 
 (setq fancy-splash-image (concat doom-user-dir "/etc/splash/blackhole.png"))
-
-(setq +doom-dashboard-menu-sections
-      '(
-        ("Jump to bookmark"
-         :icon (all-the-icons-octicon "bookmark" :face 'doom-dashboard-menu-title)
-         :action bookmark-jump)
-        ("Open project"
-         :icon (all-the-icons-octicon "briefcase" :face 'doom-dashboard-menu-title)
-         :action projectile-switch-project)
-        ("Open private configuration"
-         :icon (all-the-icons-octicon "tools" :face 'doom-dashboard-menu-title)
-         :when (file-directory-p doom-private-dir)
-         :action doom/open-private-config)
-        ("Open org-agenda"
-         :icon (all-the-icons-octicon "calendar" :face 'doom-dashboard-menu-title)
-         :when (fboundp 'org-agenda)
-         :action org-agenda)
-        ("Recently opened files"
-         :icon (all-the-icons-octicon "file-text" :face 'doom-dashboard-menu-title)
-         :action recentf-open-files)
-        ("Reload last session"
-         :icon (all-the-icons-octicon "history" :face 'doom-dashboard-menu-title)
-         :when (cond ((require 'persp-mode nil t)
-                      (file-exists-p (expand-file-name persp-auto-save-fname persp-save-dir)))
-                     ((require 'desktop nil t)
-                      (file-exists-p (desktop-full-file-name))))
-         ;; :face (:inherit (doom-dashboard-menu-title bold))
-         :action doom/quickload-session)
-        ;; ("Open documentation"
-        ;;  :icon (all-the-icons-octicon "book" :face 'doom-dashboard-menu-title)
-        ;;  :action doom/help)
-        ))
+(setq +doom-dashboard-functions #'(doom-dashboard-widget-banner doom-dashboard-widget-loaded))
+;; (setq +doom-dashboard-menu-sections
+;;       '(
+;;         ("Jump to bookmark"
+;;          :icon (all-the-icons-octicon "bookmark" :face 'doom-dashboard-menu-title)
+;;          :action bookmark-jump)
+;;         ("Open project"
+;;          :icon (all-the-icons-octicon "briefcase" :face 'doom-dashboard-menu-title)
+;;          :action projectile-switch-project)
+;;         ("Open private configuration"
+;;          :icon (all-the-icons-octicon "tools" :face 'doom-dashboard-menu-title)
+;;          :when (file-directory-p doom-private-dir)
+;;          :action doom/open-private-config)
+;;         ("Open org-agenda"
+;;          :icon (all-the-icons-octicon "calendar" :face 'doom-dashboard-menu-title)
+;;          :when (fboundp 'org-agenda)
+;;          :action org-agenda)
+;;         ("Recently opened files"
+;;          :icon (all-the-icons-octicon "file-text" :face 'doom-dashboard-menu-title)
+;;          :action recentf-open-files)
+;;         ("Reload last session"
+;;          :icon (all-the-icons-octicon "history" :face 'doom-dashboard-menu-title)
+;;          :when (cond ((require 'persp-mode nil t)
+;;                       (file-exists-p (expand-file-name persp-auto-save-fname persp-save-dir)))
+;;                      ((require 'desktop nil t)
+;;                       (file-exists-p (desktop-full-file-name))))
+;;          ;; :face (:inherit (doom-dashboard-menu-title bold))
+;;          :action doom/quickload-session)
+;;         ;; ("Open documentation"
+;;         ;;  :icon (all-the-icons-octicon "book" :face 'doom-dashboard-menu-title)
+;;         ;;  :action doom/help)
+;;         ))
 
 (setq display-line-numbers-type 'relative)
 
@@ -108,7 +112,8 @@
   ;; (setq doom-modeline-bar-width 0) ; remove vertical bar from modeline
   (setq doom-modeline-vcs-max-length 25)
   (setq mode-line-percent-position nil)
-  (setq doom-modeline-buffer-encoding nil))
+  ;; (setq doom-modeline-buffer-encoding nil)
+  )
 
 ;; hjkl in dired
 (evil-define-key 'normal dired-mode-map
@@ -269,6 +274,11 @@
       :n "[e" 'previous-error)
 
 
+(map! (:leader
+       (:prefix "w"
+                (:desc "Maximize Window"  :n "m" 'maximize-window))))
+
+
 (map! :n "]c" #'+vc-gutter/next-hunk)
 (map! :n "[c" #'+vc-gutter/previous-hunk)
 
@@ -401,14 +411,6 @@
         :n "n" (lambda () (interactive) (forward-line) (pdf-occur-view-occurrence))
         :n "N" (lambda () (interactive) (forward-line -1) (pdf-occur-view-occurrence))))
 
-(require 'ssh)
-(add-hook 'ssh-mode-hook
-          (lambda ()
-            (setq ssh-directory-tracking-mode t)
-            (shell-dirtrack-mode t)
-            (setq dirtrackp nil)))
-
-
 ;; set default projectile name in mode line
 ;; probabaly this was causing ssh over tramp to slow
 ;; still not verified
@@ -420,3 +422,17 @@
       :map sh-mode-map
       :n "Q" 'shfmt-buffer
       :v "Q" 'shfmt-region)
+
+
+(defun abshekh/clear-vterm ()
+  (interactive)
+  (term-send-raw-string (s-repeat 100 "\n"))
+  (vterm-send-key "<clear_scrollback>"))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((restclient . t)))
+
+;; install nixpkgs-fmt with this
+;; nix-env -iA nixpkgs.nixpkgs-fmt
+(setq lsp-nix-nil-formatter ["nixpkgs-fmt"])
