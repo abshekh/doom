@@ -1,9 +1,12 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
 ;; TODO: change lsp settings to use package
+;; TODO: use emacs tabbar mode
 ;; embark collect - <c-c><c-l>
 ;; embark export  - E
 ;; embark edit    - i
+;; presp.el creates workspaces
+;; projectile is to store project paths. there is a built in support for this with project.el
 
 (setq user-full-name "Abhishek Singh"
       user-mail-address "john@doe.com")
@@ -11,22 +14,24 @@
 ;; (setq-local abshekh/font "JetBrainsMono Nerd Font")
 (setq-local abshekh/font "Iosevka Term")
 
-(setq doom-font (font-spec :family abshekh/font :size 19 :weight 'normal)
-      doom-variable-pitch-font (font-spec :family abshekh/font :size 20)
+(setq doom-font (font-spec :family abshekh/font :size 21 :weight 'normal)
+      doom-variable-pitch-font (font-spec :family abshekh/font :size 22)
       doom-unicode-font (font-spec :family abshekh/font)
-      doom-big-font (font-spec :family abshekh/font :size 32 :weight 'regular))
+      doom-big-font (font-spec :family abshekh/font :size 34 :weight 'regular))
+
+;; (setq-default line-spacing 5) ;; 5% more line height i guess
 
 (load (concat doom-user-dir "work-setup.el"))
+(load (concat doom-user-dir "theme-overrides.el"))
+
+(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+(add-to-list 'default-frame-alist '(ns-appearance . dark))
+
 
 ;; (use-package autothemer :ensure t)
 ;; (setq doom-theme 'doom-moonfly)
 ;; (setq doom-theme 'doom-monokai-pro)
-
-;; (custom-set-faces!
-;;   `(mode-line :background ,(doom-color 'bg-alt))
-;;   `(mode-line-inactive :background ,(doom-color 'bg-alt))
-;;   `(doom-modeline-bar :background ,(doom-color 'bg-alt))
-;;   )
+;; (setq doom-theme 'doom-nord)
 
 ;; splash screen
 
@@ -274,9 +279,9 @@
       :n "[e" 'previous-error)
 
 
-(map! (:leader
-       (:prefix "w"
-                (:desc "Maximize Window"  :n "m" 'maximize-window))))
+;; (map! (:leader
+;;        (:prefix "w"
+;;                 (:desc "Maximize Window"  :n "m" 'maximize-window))))
 
 
 (map! :n "]c" #'+vc-gutter/next-hunk)
@@ -298,8 +303,26 @@
 (defun add-c-to-ediff-mode-map () (define-key ediff-mode-map "c" 'ediff-copy-both-to-C))
 (add-hook 'ediff-keymap-setup-hook 'add-c-to-ediff-mode-map)
 
+;; (setq ediff-fine-diff-A    :background base3 :weight 'bold)
+;; (setq ediff-fine-diff-B    :background base3 :weight 'bold)
+;; (setq ediff-fine-diff-C    :background base3 :weight 'bold)
+;; (setq ediff-current-diff-A :background base0)
+;; (setq ediff-current-diff-B :background base0)
+;; (setq ediff-current-diff-C :background base0)
+;; (setq ediff-even-diff-A    :inherit 'hl-line)
+;; (setq ediff-even-diff-B    :inherit 'hl-line)
+;; (setq ediff-even-diff-C    :inherit 'hl-line)
+;; (setq ediff-odd-diff-A     :inherit 'hl-line)
+;; (setq ediff-odd-diff-B     :inherit 'hl-line)
+;; (setq ediff-odd-diff-C     :inherit 'hl-line)
+
+;; (require 'vdiff)
+;; (require 'vdiff-magit)
+
 (setq highlight-indent-guides-method 'bitmap)
-(setq highlight-indent-guides-bitmap-function 'highlight-indent-guides--bitmap-line)
+;; (setq highlight-indent-guides-bitmap-function 'highlight-indent-guides--bitmap-line)
+;; (setq highlight-indent-guides-method 'character)
+;; (setq highlight-indent-guides-method 'fill)
 
 ;; (map! (:leader
 ;;         (:desc "search" :prefix "/"
@@ -436,3 +459,29 @@
 ;; install nixpkgs-fmt with this
 ;; nix-env -iA nixpkgs.nixpkgs-fmt
 (setq lsp-nix-nil-formatter ["nixpkgs-fmt"])
+
+;; emacs-tabbar
+(setq tab-bar-mode t)
+(setq tab-bar-show nil)
+(map! (:prefix "g"
+               (:desc "Next tab"  :n "t" 'tab-next)
+               (:desc "Previous tab"  :n "T" 'tab-previous))
+      (:prefix "<C-w>"
+               (:desc "New tab"  :n "m" 'tab-new))
+      (:leader
+       (:prefix "w"
+                (:desc "New tab"  :n "m" 'tab-new))
+       (:prefix "g"
+                (:desc "Next workspace"  :n "t" #'+workspace/switch-right)
+                (:desc "Previous workspace"  :n "T" #'+workspace/switch-left))))
+
+(add-hook 'persp-before-deactivate-functions
+          (defun +workspaces-save-tab-bar-data-h (_)
+            (when (get-current-persp)
+              (set-persp-parameter
+               'tab-bar-tabs (tab-bar-tabs)))))
+
+(add-hook 'persp-activated-functions
+          (defun +workspaces-load-tab-bar-data-h (_)
+            (tab-bar-tabs-set (persp-parameter 'tab-bar-tabs))
+            (tab-bar--update-tab-bar-lines t)))
