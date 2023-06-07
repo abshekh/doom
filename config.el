@@ -13,13 +13,14 @@
 
 ;; (setq-local abshekh/font "JetBrainsMono Nerd Font")
 (setq-local abshekh/font "Iosevka Term")
+;; (setq-local abshekh/font "Iosevka")
 
-(setq doom-font (font-spec :family abshekh/font :size 21 :weight 'normal)
+(setq doom-font (font-spec :family abshekh/font :size 21 :weight 'medium)
       doom-variable-pitch-font (font-spec :family abshekh/font :size 22)
       doom-unicode-font (font-spec :family abshekh/font)
       doom-big-font (font-spec :family abshekh/font :size 34 :weight 'regular))
 
-;; (setq-default line-spacing 5) ;; 5% more line height i guess
+(setq-default line-spacing 3) ;; 3% more line height i guess
 
 (load (concat doom-user-dir "work-setup.el"))
 (load (concat doom-user-dir "theme-overrides.el"))
@@ -27,11 +28,6 @@
 (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
 (add-to-list 'default-frame-alist '(ns-appearance . dark))
 
-
-;; (use-package autothemer :ensure t)
-;; (setq doom-theme 'doom-moonfly)
-;; (setq doom-theme 'doom-monokai-pro)
-;; (setq doom-theme 'doom-nord)
 
 ;; splash screen
 
@@ -110,21 +106,48 @@
 
 (add-hook 'calculator-mode-hook 'hide-mode-line-mode)
 
+;; (after! doom-modeline
+;;   (remove-hook 'doom-modeline-mode-hook #'size-indication-mode) ; filesize in modeline
+;;   (remove-hook 'doom-modeline-mode-hook #'column-number-mode)   ; cursor column in modeline
+;;   (line-number-mode -1)
+;;   ;; (setq doom-modeline-bar-width 0) ; remove vertical bar from modeline
+;;   (setq doom-modeline-vcs-max-length 25)
+;;   (setq mode-line-percent-position nil)
+;;   ;; (setq doom-modeline-buffer-encoding nil)
+;;   )
+;; (add-to-list 'global-mode-string '("123" wc-buffer-stats))
+
 (after! doom-modeline
-  (remove-hook 'doom-modeline-mode-hook #'size-indication-mode) ; filesize in modeline
-  (remove-hook 'doom-modeline-mode-hook #'column-number-mode)   ; cursor column in modeline
-  (line-number-mode -1)
-  ;; (setq doom-modeline-bar-width 0) ; remove vertical bar from modeline
   (setq doom-modeline-vcs-max-length 25)
-  (setq mode-line-percent-position nil)
-  ;; (setq doom-modeline-buffer-encoding nil)
-  )
+  (doom-modeline-def-segment total-tabs
+    (when doom-modeline-workspace-name
+      (when-let
+          ((name (cond
+                  ((and (fboundp 'tab-bar-mode)
+                        (length> (frame-parameter nil 'tabs) 1))
+                   (let* ((tabs (funcall tab-bar-tabs-function)))
+                     (length tabs))))))
+        (propertize (format " \/  %s " name)
+                    'face (doom-modeline-face 'doom-modeline-buffer-major-mode)))))
+  ;; TODO : cannot find a way to print total line number
+  ;; (setq doom-modeline-percent-position nil)
+  ;; (setq global-mode-string '("add info here"))
+  (doom-modeline-def-modeline 'main
+    ;; left part
+    ;; misc-info is what is present in global-mode-string
+    '(bar misc-info modals workspace-name total-tabs window-number buffer-info remote-host buffer-position word-count parrot selection-info)
+    ;; right part
+    '(objed-state persp-name battery grip irc mu4e gnus github debug lsp minor-modes input-method indent-info buffer-encoding major-mode process vcs checker)))
+
 
 ;; hjkl in dired
 (evil-define-key 'normal dired-mode-map
   (kbd "h") 'dired-up-directory
   (kbd "l") 'dired-find-file
+  (kbd "+") 'dired-create-empty-file
   )
+
+(setq company-idle-delay nil)
 
 ;; command window
 (eval-after-load 'evil-vars
@@ -422,9 +445,13 @@
   (add-hook 'conda-postactivate-hook (lambda () (lsp-restart-workspace)))
   (add-hook 'conda-postdeactivate-hook (lambda () (lsp-restart-workspace))))
 
-;; pdf tools, maybe look into evil pdf tools in the future
 (use-package pdf-tools
-  :hook (pdf-tools-enabled . pdf-view-midnight-minor-mode)
+  :hook (pdf-view-mode . (lambda ()
+                           (evil-mode t)
+                           (pdf-view-midnight-minor-mode t)
+                           ))
+  :init
+  (setq-default pdf-view-midnight-invert nil)
   :config
   (map! :after pdf-view
         :map pdf-view-mode-map
@@ -439,13 +466,10 @@
 ;; still not verified
 (setq projectile-mode-line "Projectile")
 
-;; install shfmt with this
-;; nix-env -iA nixpkgs.shfmt
 (map! :after sh-mode
       :map sh-mode-map
       :n "Q" 'shfmt-buffer
       :v "Q" 'shfmt-region)
-
 
 (defun abshekh/clear-vterm ()
   (interactive)
@@ -456,8 +480,6 @@
  'org-babel-load-languages
  '((restclient . t)))
 
-;; install nixpkgs-fmt with this
-;; nix-env -iA nixpkgs.nixpkgs-fmt
 (setq lsp-nix-nil-formatter ["nixpkgs-fmt"])
 
 ;; emacs-tabbar
@@ -485,3 +507,14 @@
           (defun +workspaces-load-tab-bar-data-h (_)
             (tab-bar-tabs-set (persp-parameter 'tab-bar-tabs))
             (tab-bar--update-tab-bar-lines t)))
+
+;; (length (tabs (tab-bar-tabs)))
+
+
+;; TODO: integrate total tab length in the mode line
+(defun tab-bar-length ()
+  (let* ((tabs (funcall tab-bar-tabs-function)))
+    (length tabs)))
+
+;; (tab-bar-length)
+;; (doom-modeline-segment--workspace-name)
