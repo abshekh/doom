@@ -21,13 +21,13 @@
       doom-big-font (font-spec :family abshekh/font :size 34 :weight 'regular))
 
 (setq-default line-spacing 3) ;; 3% more line height i guess
+(setq doom-theme 'doom-dracula)
 
 (load (concat doom-user-dir "work-setup.el"))
 (load (concat doom-user-dir "theme-overrides.el"))
 
 (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
 (add-to-list 'default-frame-alist '(ns-appearance . dark))
-
 
 ;; splash screen
 
@@ -118,7 +118,7 @@
 ;; (add-to-list 'global-mode-string '("123" wc-buffer-stats))
 
 (after! doom-modeline
-  (setq doom-modeline-vcs-max-length 25)
+  (setq doom-modeline-vcs-max-length 50)
   (doom-modeline-def-segment total-tabs
     (when doom-modeline-workspace-name
       (when-let
@@ -134,10 +134,10 @@
   ;; (setq global-mode-string '("add info here"))
   (doom-modeline-def-modeline 'main
     ;; left part
-    ;; misc-info is what is present in global-mode-string
-    '(bar misc-info modals workspace-name total-tabs window-number buffer-info remote-host buffer-position word-count parrot selection-info)
+    '(bar modals workspace-name total-tabs matches window-number buffer-info remote-host buffer-position word-count parrot selection-info)
     ;; right part
-    '(objed-state persp-name battery grip irc mu4e gnus github debug lsp minor-modes input-method indent-info buffer-encoding major-mode process vcs checker)))
+    ;; misc-info is what is present in global-mode-string
+    '(misc-info objed-state persp-name battery grip irc mu4e gnus github debug lsp minor-modes input-method indent-info buffer-encoding major-mode process vcs checker)))
 
 
 ;; hjkl in dired
@@ -158,6 +158,7 @@
 (add-hook 'minibuffer-setup-hook #'turn-off-smartparens-mode)
 (add-hook 'lisp-mode-hook #'turn-off-smartparens-mode)
 
+(require 'dwim-shell-commands)
 (use-package dwim-shell-command
   :ensure t
   :bind (([remap shell-command] . dwim-shell-command)
@@ -166,7 +167,6 @@
          ([remap dired-do-shell-command] . dwim-shell-command)
          ([remap dired-smart-shell-command] . dwim-shell-command))
   )
-(require 'dwim-shell-commands)
 
 
 ;; resize windows with ctrl arrow keys
@@ -224,24 +224,7 @@
 (add-to-list 'default-frame-alist '(fullscreen . fullscreen))
 ;; (set-frame-parameter (selected-frame) 'fullscreen 'fullscreen) ;; for mac
 
-(after! flycheck
-  (setq flycheck-checker-error-threshold 9999)
-  ;; (setq flycheck-idle-change-delay 10.0) ;; make it 2 seconds as 1 seconds seems to fast for rust
-  ;; (setq flycheck-display-errors-delay 5.0)
-  (setq lsp-ui-sideline-enable nil)
-  ;; (setq flycheck-check-syntax-automatically '(save idle-buffer-switch new-line))
-  (add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode)
-  ;; (add-hook 'flycheck-popup-tip-mode-hook 'flycheck-popup-tip-error-prefix "")
-  ;; (add-hook 'flycheck-popup-tip-mode-hook (lambda () (flycheck-popup-tip-error-prefix "")))
-  )
-(after! flycheck-popup-tip
-  (setq flycheck-popup-tip-error-prefix "")
-  )
-;; (after! flycheck-popup-tip-mode
-;;   (setq flycheck-popup-tip-error-prefix "")
-;;   )
-
-(setq lsp-response-timeout 2) ;; probably fixes lsp freezes
+;; (setq lsp-response-timeout 2) ;; probably fixes lsp freezes
 ;; (setq lsp-diagnostic-clean-after-change t) ;; errors where showing in rust on the fly (is not working)
 
 (setq auto-revert-check-vc-info t)
@@ -279,13 +262,27 @@
 ;; definition gd
 ;; implementation gI
 ;; decalration and reference
+
+(require 'flymake-diagnostic-at-point)
+(use-package flymake-diagnostic-at-point
+  :after flymake
+  :config
+  (add-hook 'flymake-mode-hook #'flymake-diagnostic-at-point-mode)
+  (setq flymake-diagnostic-at-point-display-diagnostic-function #'flymake-diagnostic-at-point-display-minibuffer))
+  
+
+(add-hook! prog-mode #'flymake-mode)
+
+(after! lsp-mode
+  (setq lsp-diagnostics-provider :flymake))
+
 (map! :nv "Q" #'+format/region-or-buffer)
-(map! :n "]e" 'flycheck-next-error)
-(map! :n "[e" 'flycheck-previous-error)
+(map! :n "]e" 'flymake-goto-next-error)
+(map! :n "[e" 'flymake-goto-prev-error)
 (map! (:leader
        (:desc "LSP Rename"              :n "r" 'lsp-rename)
-       (:desc "Explain error"           :n "l" 'flycheck-explain-error-at-point)
-       (:desc "List buffer errors"      :n "d" 'flycheck-list-errors)
+       ;; (:desc "Explain error"           :n "l" 'flycheck-explain-error-at-point)
+       (:desc "List buffer errors"      :n "d" 'flymake-show-buffer-diagnostics)
        (:desc "List workspace errors"   :n "D" 'lsp-treemacs-errors-list)
        (:prefix "c"
                 (:desc "Run Code Lens"  :n "l" 'lsp-avy-lens))))
@@ -309,6 +306,8 @@
 
 (map! :n "]c" #'+vc-gutter/next-hunk)
 (map! :n "[c" #'+vc-gutter/previous-hunk)
+
+
 
 ;; make gutters look good
 (after! git-gutter-fringe
@@ -371,6 +370,8 @@
 (setq lsp-haskell-plugin-ghcide-type-lenses-global-on nil)
 (setq lsp-haskell-plugin-import-lens-code-lens-on nil)
 (setq lsp-haskell-plugin-import-lens-code-actions-on nil)
+(rassq-delete-all 'haskell-cabal-mode auto-mode-alist) ;; disable cabal mode, this was causing issues
+
 
 (setq-hook! 'haskell-mode-hook
   lsp-lens-enable nil)
@@ -483,6 +484,7 @@
 (setq lsp-nix-nil-formatter ["nixpkgs-fmt"])
 
 ;; emacs-tabbar
+;; TODO: keymap for 4gt
 (setq tab-bar-mode t)
 (setq tab-bar-show nil)
 (map! (:prefix "g"
@@ -507,14 +509,3 @@
           (defun +workspaces-load-tab-bar-data-h (_)
             (tab-bar-tabs-set (persp-parameter 'tab-bar-tabs))
             (tab-bar--update-tab-bar-lines t)))
-
-;; (length (tabs (tab-bar-tabs)))
-
-
-;; TODO: integrate total tab length in the mode line
-(defun tab-bar-length ()
-  (let* ((tabs (funcall tab-bar-tabs-function)))
-    (length tabs)))
-
-;; (tab-bar-length)
-;; (doom-modeline-segment--workspace-name)
